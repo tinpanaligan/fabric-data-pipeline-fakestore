@@ -12,7 +12,7 @@ The main objective is to showcase Fabric’s capability to ingest API data, tran
 
 ## Architecture
 
-![Architecture Diagram](link_to_your_image_if_any)
+![Architecture Diagram](image)
 
 ---
 
