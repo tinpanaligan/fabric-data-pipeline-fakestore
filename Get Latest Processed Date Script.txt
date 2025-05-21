@@ -1,0 +1,4 @@
+SELECT TOP 1 latest_processed_dat
+FROM metadata.processing_log
+WHERE table_processed = 'carts'
+ORDER BY latest_processed_data DESC;

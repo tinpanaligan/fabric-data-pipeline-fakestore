@@ -1,0 +1,65 @@
+CREATE SCHEMA [metadata]
+GO;
+
+DROP TABLE [metadata].[pipeline_log]
+
+CREATE TABLE [metadata].[pipeline_log] (
+    PipelineRunId VARCHAR(100),
+    TableName VARCHAR(100),
+    RowsProcessed INT,
+    LatestDataDate DATE,
+    LoggedAt DATETIME2(6)
+);
+
+CREATE PROCEDURE metadata.sp_log_pipeline_activity
+    @PipelineRunId VARCHAR(100),
+    @TableName VARCHAR(100),
+    @RowsProcessed INT,
+    @LatestDataDate DATETIME2
+AS
+
+    INSERT INTO metadata.pipeline_log (
+        PipelineRunId,
+        TableName,
+        RowsProcessed,
+        LatestDataDate
+    )
+    VALUES (
+        @PipelineRunId,
+        @TableName,
+        @RowsProcessed,
+        @LatestDataDate
+    );
+
+ALTER PROCEDURE metadata.sp_log_pipeline_activity
+    @PipelineRunId VARCHAR(100),
+    @TableName VARCHAR(100),
+    @RowsProcessed INT = NULL,         -- optional placeholder
+    @LatestDataDate DATETIME2
+AS
+BEGIN
+    DECLARE @RowCount INT;
+
+    -- Compute row count based on table name
+    IF @TableName = 'stg_products'
+        SELECT @RowCount = COUNT(*) FROM stg_products WHERE RunDate = CAST(@LatestDataDate AS DATE);
+    ELSE IF @TableName = 'stg_users'
+        SELECT @RowCount = COUNT(*) FROM stg_users WHERE RunDate = CAST(@LatestDataDate AS DATE);
+    ELSE IF @TableName = 'stg_cart_products'
+        SELECT @RowCount = COUNT(*) FROM stg_cart_products WHERE RunDate = CAST(@LatestDataDate AS DATE);
+    ELSE
+        SET @RowCount = NULL;
+
+    INSERT INTO metadata.pipeline_log (
+        PipelineRunId,
+        TableName,
+        RowsProcessed,
+        LatestDataDate
+    )
+    VALUES (
+        @PipelineRunId,
+        @TableName,
+        @RowCount,
+        @LatestDataDate
+    );
+END;

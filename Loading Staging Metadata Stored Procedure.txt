@@ -1,0 +1,72 @@
+CREATE TABLE metadata.processing_log
+(
+    pipeline_run_id VARCHAR(255),
+    table_processed VARCHAR(255),
+    rows_processed INT,
+    latest_processed_data DATETIME2(6),
+    processed_datetime DATETIME2(6)
+);
+
+CREATE PROCEDURE metadata.log_stg_carts
+    @pipeline_run_id VARCHAR(255),
+    @processed_datetime DATETIME2
+AS
+BEGIN
+    INSERT INTO metadata.processing_log (
+        pipeline_run_id,
+        table_processed,
+        rows_processed,
+        latest_processed_data,
+        processed_datetime
+    )
+    SELECT
+        @pipeline_run_id,
+        'carts',
+        COUNT(*),
+        MAX(CAST([date] AS DATETIME2)),
+        @processed_datetime
+    FROM stg.carts;
+END;
+
+CREATE PROCEDURE metadata.log_stg_products
+    @pipeline_run_id VARCHAR(255),
+    @processed_datetime DATETIME2
+AS
+BEGIN
+    INSERT INTO metadata.processing_log (
+        pipeline_run_id,
+        table_processed,
+        rows_processed,
+        latest_processed_data,
+        processed_datetime
+    )
+    SELECT
+        @pipeline_run_id,
+        'products',
+        COUNT(*),
+        NULL,
+        @processed_datetime
+    FROM stg.products;
+END;
+
+CREATE PROCEDURE metadata.log_stg_users
+    @pipeline_run_id VARCHAR(255),
+    @processed_datetime DATETIME2
+AS
+BEGIN
+    INSERT INTO metadata.processing_log (
+        pipeline_run_id,
+        table_processed,
+        rows_processed,
+        latest_processed_data,
+        processed_datetime
+    )
+    SELECT
+        @pipeline_run_id,
+        'users',
+        COUNT(*),
+        NULL,
+        @processed_datetime
+    FROM stg.users;
+END;
+
